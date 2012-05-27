@@ -7,6 +7,8 @@ $temp_path = "#{$razor_root}/tmp"
 #puts "Razor root: #{$razor_root}"
 #puts "Logging path: #{$logging_path}"
 
+$:.unshift File.dirname(__FILE__)
+
 require "project_razor/object"
 require "project_razor/filtering"
 require "project_razor/utility"

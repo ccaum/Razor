@@ -28,7 +28,7 @@ module ProjectRazor
       def read_config
         setup_data
         if @web_command # is this a web command
-          print @data.config.to_hash.to_json
+          @data.config.to_hash.to_json
         else
           puts "ProjectRazor Config:"
           @data.config.to_hash.each do
