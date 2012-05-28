@@ -29,32 +29,18 @@ class ProjectRazorInterface
   def call_razor_slice
     raise NoSliceFound unless is_slice?
 
-    begin
-      razor_module = Object.full_const_get(SLICE_PREFIX + namespace.capitalize).new(arguments)
-      razor_module.web_command = web_command
-      razor_module.verbose = verbose
-      razor_module.debug = debug
-      razor_module.slice_call
-    rescue => e
-      raise if debug
-      print_header
-      if namespace
-        print "\n [#{namespace.capitalize}] ".red
-        print "<-#{e.message} \n".yellow
-      end
-    end
+    razor_module = Object.full_const_get(SLICE_PREFIX + namespace.capitalize).new(arguments)
+    razor_module.web_command = web_command
+    razor_module.verbose = verbose
+    razor_module.debug = debug
+    razor_module.slice_call
   end
 
   # Load slices
   def get_slices_loaded
-    temp_hash = Hash.new
-    ObjectSpace.each_object do |object_class|
-      if object_class.to_s.start_with?(SLICE_PREFIX) && object_class.to_s != SLICE_PREFIX
-        @slice_array << object_class.to_s.sub(SLICE_PREFIX,"").strip
-      end
+    @slice_array = ProjectRazor::Slice.class_children.map do |object_class|
+      object_class.to_s.gsub(/#{SLICE_PREFIX}/, '')
     end
-
-    @slice_array.uniq!
   end
 
   # Validate slice
