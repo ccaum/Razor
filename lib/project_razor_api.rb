@@ -1,49 +1,9 @@
 require 'sinatra/base'
 require "#{File.dirname(__FILE__)}/project_razor_interface"
+require "#{File.dirname(__FILE__)}/project_razor_api/sinatra_helpers"
 
 class ProjectRazorAPI < Sinatra::Base
-  helpers do
-    def razor
-      @razor ||= ProjectRazorInterface.new
-    end
-
-    def config
-      unless @config
-        config = ProjectRazor::Data.instance
-        config.check_init
-        config.to_hash['@razor_config']
-      end
-    end
-
-    def run_razor(params = Array.new)
-      razor.web_command = true
-      razor.namespace = params.shift
-      razor.arguments = params
-
-      begin
-        razor.call_razor_slice
-      rescue => e
-        error 406 do
-          e.message
-        end
-      end
-    end
-
-    def api_call(slice = String.new, params)
-      args = [ *slice ]
-
-      if params.size < 3
-        args << 'default'
-      end
-
-      args << params
-
-      # XXX We really need to pick one class
-      # that gets returned
-      result = run_razor(args)
-      result.is_a?(String) ? result : result.to_json
-    end
-  end
+  helpers SinatraHelpers
 
   get '/razor/api/boot' do
     api_call 'boot', params.to_json
@@ -70,22 +30,21 @@ class ProjectRazorAPI < Sinatra::Base
   get '/razor/image/os/:image/*' do
     result = run_razor(['image', 'path', params[:image]])
     status result['status']
-    puts result['response'] + params[:splat].first
     send_file result['response'] + params[:splat].first
   end
 
   post '/razor/api/*' do
-    commands = params[:splat].first.split('/')
+    commands = params[:splat].first.split('/') << 'add'
     api_call commands, params['json_hash']
   end
 
   put '/razor/api/*' do
-    commands = params[:splat].first.split('/')
+    commands = params[:splat].first.split('/') << 'update'
     api_call commands, params['json_hash']
   end
 
   delete '/razor/api/*' do
-    commands = params[:splat].first.split('/')
+    commands = params[:splat].first.split('/') << 'remove'
     api_call commands, params['json_hash']
   end
 end
