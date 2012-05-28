@@ -89,8 +89,12 @@ if $0 == __FILE__
       print_header
       print "\n [#{razor.namespace.capitalize}] ".red
       print "<-Invalid Slice \n".yellow
-    rescue
-      print_header
+    rescue => e
+      raise if debug
+      if namespace
+        print "\n [#{namespace.capitalize}] ".red
+        print "<-#{e.message} \n".yellow
+      end
     end
 
   else
