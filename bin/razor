@@ -84,12 +84,7 @@ if $0 == __FILE__
     razor.arguments = ARGV
 
     begin
-      result = razor.call_razor_slice
-      if razor.web_command
-        puts result
-      else
-        puts result
-      end
+      puts razor.call_razor_slice
     rescue ProjectRazorInterface::NoSliceFound
       print_header
       print "\n [#{razor.namespace.capitalize}] ".red

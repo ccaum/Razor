@@ -322,32 +322,38 @@ module ProjectRazor
       end
 
       def print_object_details_cli(obj)
-        obj.instance_variables.each do
-        |iv|
+        return_string = String.new
+
+        obj.instance_variables.each do |iv|
           unless iv.to_s.start_with?("@_")
             key = iv.to_s.sub("@", "")
-            print "#{key}: "
-            print "#{obj.instance_variable_get(iv)}  ".green
+            return_string << "#{key}: "
+            return_string << "#{obj.instance_variable_get(iv)}  ".green
           end
         end
-        print "\n"
+        return_string << "\n"
+        return_string
       end
 
       def print_model_configs(model_array)
+        return_string = String.new
+
         unless @web_command
-          puts "Model Configs:"
+          return_string << "Model Configs:"
           unless @verbose
             model_array.each do |model|
-              print "   Label: " + "#{model.label}".yellow
-              print "  Type: " + "#{model.name}".yellow
-              print "  Description: " + "#{model.description}".yellow
-              print "\n  Model UUID: " + "#{model.uuid}".yellow
-              print "  Image UUID: " + "#{model.image_uuid}".yellow if model.instance_variable_get(:@image_uuid) != nil
-              print "\n\n"
+              return_string << "   Label: " + "#{model.label}".yellow
+              return_string << "  Type: " + "#{model.name}".yellow
+              return_string << "  Description: " + "#{model.description}".yellow
+              return_string << "\n  Model UUID: " + "#{model.uuid}".yellow
+              return_string << "  Image UUID: " + "#{model.image_uuid}".yellow if model.instance_variable_get(:@image_uuid) != nil
+              return_string << "\n\n"
             end
           else
-            model_array.each { |model| print_object_details_cli(model) }
+            model_array.each { |model| return_string << print_object_details_cli(model) }
           end
+
+          return_string
         else
           model_array = model_array.collect { |model| model.to_hash }
           slice_success(model_array, false)
@@ -359,12 +365,16 @@ module ProjectRazor
           templates_array = templates_array.collect { |template| template.to_hash }
           slice_success(templates_array, false)
         else
-          puts "Valid Model Templates:"
+          return_string = String.new
+
+          return_string << "Valid Model Templates:"
           if @verbose
-            templates_array.each { |template| print_object_details_cli(template) }
+            templates_array.each { |template| return_string << print_object_details_cli(template) }
           else
-            templates_array.each { |template| puts "\t#{template.name} ".yellow + " :  #{template.description}" }
+            templates_array.each { |template| return_string << "\t#{template.name} ".yellow + " :  #{template.description}" }
           end
+
+          return_string
         end
       end
 
@@ -372,27 +382,28 @@ module ProjectRazor
       # @param [Array] images_array
       def print_images(images_array)
         unless @web_command
-          puts "Images:"
+          return_string = "Images:\n"
 
           unless @verbose
-            images_array.each do
-            |image|
-              image.print_image_info(@data.config.image_svc_path)
-              print "\n"
+            images_array.each do |image|
+              return_string << image.print_image_info(@data.config.image_svc_path)
+              return_string << "\n"
             end
+
+            return_string
           else
-            images_array.each do
-            |image|
-              image.instance_variables.each do
-              |iv|
+            images_array.each do |image|
+              image.instance_variables.each do |iv|
                 unless iv.to_s.start_with?("@_")
                   key = iv.to_s.sub("@", "")
-                  print "#{key}: "
-                  print "#{image.instance_variable_get(iv)}  ".green
+                  return_string << "#{key}: "
+                  return_string << "#{image.instance_variable_get(iv)}  ".green
                 end
               end
-              print "\n"
+              return_string << "\n\n"
             end
+
+            return_string
           end
         else
           images_array = images_array.collect { |image| image.to_hash }
@@ -404,33 +415,32 @@ module ProjectRazor
       # @param [Hash] node_array
       def print_node(node_array)
         unless @web_command
-          puts "Nodes:"
+          return_string = "Nodes:"
 
           unless @verbose
-            node_array.each do
-            |node|
-              print "\tuuid: "
-              print "#{node.uuid}  ".green
-              print "last state: "
-              print "#{node.last_state}  ".green
-              print "name: " unless node.name == nil
-              print "#{node.name}  ".green unless node.name == nil
-              print "\n"
+            node_array.each do |node|
+              return_string << "\tuuid: "
+              return_string << "#{node.uuid}  ".green
+              return_string << "last state: "
+              return_string << "#{node.last_state}  ".green
+              return_string << "name: " unless node.name == nil
+              return_string << e#{node.name}  ".green unless node.name == nil
+              return_string "\n"
             end
           else
-            node_array.each do
-            |node|
-              node.instance_variables.each do
-              |iv|
+            node_array.each do |node|
+              node.instance_variables.each do |iv|
                 unless iv.to_s.start_with?("@_")
                   key = iv.to_s.sub("@", "")
-                  print "#{key}: "
-                  print "#{node.instance_variable_get(iv)}  ".green
+                  return_string << "#{key}: "
+                  return_string << "#{node.instance_variable_get(iv)}  ".green
                 end
               end
-              print "\n"
+              return_string << "\n"
             end
           end
+
+          return_string
         else
           node_array = node_array.collect { |node| node.to_hash }
           slice_success(node_array,false)
@@ -480,7 +490,7 @@ module ProjectRazor
 
       def print_tag_rule(object_array)
         unless @web_command
-          puts "Tag Rules:"
+          return_string = "Tag Rules:"
 
           unless @verbose
 
@@ -489,8 +499,7 @@ module ProjectRazor
             line_color = :green
             header_color = :white
 
-            object_array.each do
-            |rule|
+            object_array.each do |rule|
               print_array << rule.print_items
               header = rule.print_header
               line_color = rule.line_color
@@ -498,20 +507,20 @@ module ProjectRazor
             end
 
             print_array.unshift header if header != []
-            print_table(print_array, line_color, header_color)
+            return_string << print_table(print_array, line_color, header_color)
           else
-            object_array.each do
-            |rule|
-              rule.instance_variables.each do
-              |iv|
+            object_array.each do |rule|
+              rule.instance_variables.each do |iv|
                 unless iv.to_s.start_with?("@_")
                   key = iv.to_s.sub("@", "")
-                  print "#{key}: "
-                  print "#{rule.instance_variable_get(iv)}  ".green
+                  return_string << "#{key}: "
+                  return_string << "#{rule.instance_variable_get(iv)}  ".green
                 end
               end
-              print "\n"
+              return_string << "\n"
             end
+
+            return_string
           end
         else
           object_array = object_array.collect { |rule| rule.to_hash }
@@ -521,31 +530,30 @@ module ProjectRazor
 
       def print_tag_matcher(object_array)
         unless @web_command
-          puts "\t\tTag Matchers:"
+          return_string = "\t\tTag Matchers:"
 
           unless @verbose
-            object_array.each do
-            |matcher|
-              print "   Key: " + "#{matcher.key}".yellow
-              print "  Compare: " + "#{matcher.compare}".yellow
-              print "  Value: " + "#{matcher.value}".yellow
-              print "  Inverse: " + "#{matcher.inverse}".yellow
-              print "\n"
+            object_array.each do |matcher|
+              return_string << "   Key: " + "#{matcher.key}".yellow
+              return_string << "  Compare: " + "#{matcher.compare}".yellow
+              return_string << "  Value: " + "#{matcher.value}".yellow
+              return_string << "  Inverse: " + "#{matcher.inverse}".yellow
+              return_string << "\n"
             end
           else
-            object_array.each do
-            |matcher|
-              matcher.instance_variables.each do
-              |iv|
+            object_array.each do |matcher|
+              matcher.instance_variables.each do |iv|
                 unless iv.to_s.start_with?("@_")
                   key = iv.to_s.sub("@", "")
-                  print "#{key}: "
-                  print "#{matcher.instance_variable_get(iv)}  ".green
+                  return_string << "#{key}: "
+                  return_string << "#{matcher.instance_variable_get(iv)}  ".green
                 end
               end
-              print "\n"
+              return_string << "\n"
             end
           end
+
+          return_string
         else
           object_array = object_array.collect { |matcher| matcher.to_hash }
           slice_success(object_array, false)
@@ -556,9 +564,11 @@ module ProjectRazor
         # This is for backwards compatibility
         title = options[:title] unless title
         unless @web_command
-          puts title if title
+          return_string = String.new
+
+          return_string << "#{title}\n" if title
           unless object_array.count > 0
-            puts "< none >".red
+            return_string << "< none >".red
           end
           unless @verbose
             print_array = []
@@ -567,10 +577,9 @@ module ProjectRazor
             header_color = :white
 
             if object_array.count == 1 && options[:style] != :table
-              puts print_single_item(object_array.first)
+              return_string << print_single_item(object_array.first)
             else
-              object_array.each do
-              |obj|
+              object_array.each do |obj|
                 print_array << obj.print_items
                 header = obj.print_header
                 line_colors << obj.line_color
@@ -578,22 +587,22 @@ module ProjectRazor
               end
               # If we have more than one item we use table view, otherwise use item view
               print_array.unshift header if header != []
-              puts print_table(print_array, line_colors, header_color)
+              return_string << print_table(print_array, line_colors, header_color)
             end
           else
-            object_array.each do
-            |obj|
-              obj.instance_variables.each do
-              |iv|
+            object_array.each do |obj|
+              obj.instance_variables.each do |iv|
                 unless iv.to_s.start_with?("@_")
                   key = iv.to_s.sub("@", "")
-                  print "#{key}: "
-                  print "#{obj.instance_variable_get(iv)}  ".green
+                  return_string << "#{key}: "
+                  return_string << "#{obj.instance_variable_get(iv)}  ".green
                 end
               end
-              print "\n"
+              return_string << "\n"
             end
           end
+
+          return_string
         else
           if @uri_root
             object_array = object_array.collect do |object|
@@ -616,11 +625,9 @@ module ProjectRazor
       end
 
       def iterate_obj(obj_hash)
-        obj_hash.each do
-          |k,v|
+        obj_hash.each do |k,v|
           if obj_hash[k].class == Array
-            obj_hash[k].each do
-              |item|
+            obj_hash[k].each do |item|
               if item.class == Hash
                 add_uri_to_object_hash(item)
               end
@@ -652,8 +659,7 @@ module ProjectRazor
         end
         line_color = obj.line_color
         header_color = obj.header_color
-        print_array.each_with_index do
-        |val, index|
+        print_array.each_with_index do |val, index|
           if header_color
             print_output << " " + "#{header[index]}".send(header_color)
           else
@@ -672,11 +678,9 @@ module ProjectRazor
 
       def print_table(print_array, line_colors, header_color)
         table = ""
-        print_array.each_with_index do
-        |line, li|
+        print_array.each_with_index do |line, li|
           line_string = ""
-          line.each_with_index do
-          |col, ci|
+          line.each_with_index do |col, ci|
             max_col = print_array.collect {|x| x[ci].length}.max
             if li == 0
               if header_color

@@ -189,16 +189,18 @@ module ProjectRazor
       def print_image_info(image_svc_path)
         set_image_svc_path(image_svc_path) unless @_image_svc_path != nil
 
-        print "\tUUID: "
-        print "#{@uuid}  \n".green
-        print "\tType: "
-        print "#{@description}  \n".green
-        print "\tISO Filename: "
-        print "#{@filename}  \n".green
-        print "\tPath: "
-        print "#{image_path}  \n".green
-        print "\tStatus: "
-        print "#{verify(image_svc_path) ? "Valid".green : "Broken/Missing".red}   \n"
+        return_string = String.new
+
+        return_string << "\tUUID: "
+        return_string << "#{@uuid}  \n".green
+        return_string << "\tType: "
+        return_string << "#{@description}  \n".green
+        return_string << "\tISO Filename: "
+        return_string << "#{@filename}  \n".green
+        return_string << "\tPath: "
+        return_string << "#{image_path}  \n".green
+        return_string << "\tStatus: "
+        return_string << "#{verify(image_svc_path) ? "Valid".green : "Broken/Missing".red}   \n"
       end
     end
   end

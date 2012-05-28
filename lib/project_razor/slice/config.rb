@@ -30,12 +30,13 @@ module ProjectRazor
         if @web_command # is this a web command
           @data.config.to_hash.to_json
         else
-          puts "ProjectRazor Config:"
-          @data.config.to_hash.each do
-          |key,val|
-            print "\t#{key.sub("@","")}: ".white
-            print "#{val} \n".green
+          return_string = "ProjectRazor Config:\n"
+          @data.config.to_hash.each do |key,val|
+            return_string << "\t#{key.sub("@","")}: ".white
+            return_string << "#{val} \n".green
           end
+
+          return_string
         end
       end
 
@@ -49,7 +50,7 @@ module ProjectRazor
         @ipxe_options[:nic_max] = 7
 
         ipxe_script = File.join(File.dirname(__FILE__), "config/razor.ipxe.erb")
-        puts ERB.new(File.read(ipxe_script)).result(binding)
+        ERB.new(File.read(ipxe_script)).result(binding)
       end
 
     end

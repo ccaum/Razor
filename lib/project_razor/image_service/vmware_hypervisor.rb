@@ -62,8 +62,11 @@ module ProjectRazor
 
       def print_image_info(image_svc_path)
         super(image_svc_path)
-        print "\tVersion: "
-        print "#{@esxi_version}  \n".green
+
+        return_string = String.new
+
+        return_string << "\tVersion: "
+        return_string << "#{@esxi_version}  \n".green
       end
 
     end

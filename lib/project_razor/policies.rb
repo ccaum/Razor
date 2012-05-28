@@ -71,7 +71,6 @@ module ProjectRazor
 
       def move_lower(policy_uuid)
         policy_index = find_policy_index(policy_uuid)
-        puts "#{policy_index} == #{(@p_table.count - 1)}"
         unless policy_index == (@p_table.count - 1)
           @p_table[policy_index], @p_table[policy_index + 1] = @p_table[policy_index + 1], @p_table[policy_index]
           update_table

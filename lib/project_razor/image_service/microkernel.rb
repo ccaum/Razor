@@ -137,11 +137,13 @@ module ProjectRazor
       end
 
       def print_image_info(image_svc_path)
-        super(image_svc_path)
-        print "\tVersion: "
-        print "#{@iso_version}  \n".green
-        print "\tBuild Time: "
-        print "#{Time.at(@iso_build_time)}  \n".green
+        return_string = String.new
+
+        return_string << super(image_svc_path)
+        return_string << "\tVersion: "
+        return_string << "#{@iso_version}  \n".green
+        return_string << "\tBuild Time: "
+        return_string << "#{Time.at(@iso_build_time)}  \n".green
       end
 
       def version_weight

@@ -91,7 +91,7 @@ module ProjectRazor
           @current_power_state, @board_serial_number = nil, nil
           return_vals = get_name_value_args(%W[uuid mac ip])
           @uuid, @mac, @ip = return_vals["uuid"], return_vals["mac"], return_vals["ip"]
-          puts "#{return_vals['uuid']}, #{return_vals['mac']}, #{return_vals['ip']}"
+          "#{return_vals['uuid']}, #{return_vals['mac']}, #{return_vals['ip']}"
         end
         begin
           # if we have the details we need, then insert this bmc into the database (or

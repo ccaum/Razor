@@ -34,11 +34,13 @@ module ProjectRazor
       end
 
       def print_image_info(image_svc_path)
-        super(image_svc_path)
-        print "\tOS Name: "
-        print "#{@os_name}  \n".green
-        print "\tOS Version: "
-        print "#{@os_version}  \n".green
+        return_string = String.new
+        return_string << super(image_svc_path)
+
+        return_string << "\tOS Name: "
+        return_string << "#{@os_name}  \n".green
+        return_string << "\tOS Version: "
+        return_string << "#{@os_version}  \n".green
       end
 
     end

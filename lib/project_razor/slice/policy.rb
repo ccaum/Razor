@@ -295,10 +295,8 @@ module ProjectRazor
         node            = @data.fetch_object_by_uuid(:node, active_model.node_uuid)
         callback_return = active_model.model.callback_init(callback, @command_array, node, active_model.uuid, active_model.broker)
         active_model.update_self
-        puts callback_return
+        callback_return
       end
     end
   end
 end
-
-

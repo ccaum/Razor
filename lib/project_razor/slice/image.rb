@@ -121,6 +121,8 @@ module ProjectRazor
 
       #Add an image
       def add_image
+        return_string = String.new
+
         @command = :add
         setup_data
         image_types = {:mk => {:desc => "MicroKernel ISO",
@@ -138,7 +140,7 @@ module ProjectRazor
         image_type = @command_array.shift
 
         unless ([image_type.to_sym] - image_types.keys).size == 0
-          print_types(image_types)
+          return_string << print_types(image_types)
           raise ProjectRazor::Error::Slice::InvalidImageType, image_type
         end
 
@@ -155,8 +157,8 @@ module ProjectRazor
 
         raise ProjectRazor::Error::Slice::InternalError, "Could not save image." unless insert_image(new_image)
 
-        puts "\nNew image added successfully\n".green
-        print_images [new_image]
+        return_string << "\nNew image added successfully\n".green
+        return_string << print_images([new_image])
       end
 
       def add_mk(new_image, iso_path, image_svc_path)
@@ -187,19 +189,21 @@ module ProjectRazor
       end
 
       def print_types(types)
+        return_string = String.new
 
         unless @image_types
           get_types
         end
 
-        puts "\nPlease select a valid image type.\nValid types are:".red
-        @image_types.map {|x| x unless x.hidden}.compact.each do
-        |type|
-          print "\t[#{type.path_prefix}]".yellow
-          print " - "
-          print "#{type.description}".yellow
-          print "\n"
+        return_string << "\nPlease select a valid image type.\nValid types are:\n".red
+        @image_types.map {|x| x unless x.hidden}.compact.each do |type|
+          return_string << "\t[#{type.path_prefix}]".yellow
+          return_string << " - "
+          return_string << "#{type.description}".yellow
+          return_string << "\n"
         end
+
+        return_string
       end
 
       def remove_image

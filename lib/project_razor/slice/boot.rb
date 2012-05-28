@@ -54,7 +54,7 @@ module ProjectRazor
       end
 
       def error_reboot_node(msg)
-        puts "#{msg}\necho API Error, will reboot in 30 seconds\nsleep 30\nreboot\n"
+        "#{msg}\necho API Error, will reboot in 30 seconds\nsleep 30\nreboot\n"
       end
     end
   end

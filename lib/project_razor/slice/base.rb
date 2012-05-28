@@ -99,8 +99,7 @@ module ProjectRazor
           # No commands or arguments are left, we need to call the :default action
           if @slice_commands[:default]
             #puts "No command specified using calling (default)"
-            eval_action(@command_hash[:default])
-            return
+            return eval_action(@command_hash[:default])
           else
             #puts "No (default) action defined"
             raise ProjectRazor::Error::Slice::Generic, "No Default Action"
@@ -218,9 +217,9 @@ module ProjectRazor
         if @web_command
           return_hash
         else
-          print "\n\n#{@slice_name.capitalize}"
-          print " #{return_hash["command"]}\n"
-          print " #{return_hash["response"]}\n"
+          return_string = "\n\n#{@slice_name.capitalize}"
+          return_string << " #{return_hash["command"]}\n"
+          return_string << " #{return_hash["response"]}\n"
         end
       end
 
@@ -286,31 +285,34 @@ module ProjectRazor
       # Prints available commands to CLI for slice
       # @param [Hash] return_hash
       def available_commands(return_hash)
-        print "\nAvailable commands for [#@slice_name]:\n"
-        @slice_commands.each_key do
-        |k|
-          print "[#{k}] ".yellow unless k == :default
+        return_string = String.new
+
+        return_string << "\nAvailable commands for [#@slice_name]:\n"
+        @slice_commands.each_key do |k|
+          return_string << "[#{k}] ".yellow unless k == :default
         end
-        print "\n\n"
+        return_string << "\n\n"
         if return_hash != nil
-          print "[#{@slice_name.capitalize}] "
-          print "[#{return_hash["command"]}] ".red
-          print "<-#{return_hash["result"]}\n".yellow
-          puts "\nCommand syntax:" + " #{@slice_commands_help[@command]}".red + "\n" unless @slice_commands_help[@command] == nil
+          return_string << "[#{@slice_name.capitalize}] "
+          return_string << "[#{return_hash["command"]}] ".red
+          return_string << "<-#{return_hash["result"]}\n".yellow
+          return_string << "\nCommand syntax:" + " #{@slice_commands_help[@command]}".red + "\n" unless @slice_commands_help[@command] == nil
         end
       end
 
       def list_help(return_hash = nil)
-        if return_hash != nil
-          print "[#{@slice_name.capitalize}] "
-          print "[#{return_hash["command"]}] ".red
-          print "<-#{return_hash["result"]}\n".yellow
+        return_string = String.new
+
+        if return_hash
+          return_string << "[#{@slice_name.capitalize}] "
+          return_string << "[#{return_hash["command"]}] ".red
+          return_string << "<-#{return_hash["result"]}\n".yellow
         end
         @command_hash[:help] = "n/a" unless @command_hash[:help]
         if @command_help_text
-          puts "\nCommand help:\n" +  @command_help_text
+          return_string << "\nCommand help:\n" +  @command_help_text
         else
-          puts "\nCommand help:\n" +  @command_hash[:help]
+          return_string << "\nCommand help:\n" +  @command_hash[:help]
         end
       end
 
