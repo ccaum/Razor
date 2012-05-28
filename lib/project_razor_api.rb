@@ -9,10 +9,6 @@ class ProjectRazorAPI < Sinatra::Base
 
     def config
       unless @config
-        razor.web_command = true
-        razor.namespace = 'config'
-        razor.arguments = ['read']
-
         config = ProjectRazor::Data.instance
         config.check_init
         config.to_hash['@razor_config']
@@ -28,11 +24,7 @@ class ProjectRazorAPI < Sinatra::Base
         razor.call_razor_slice
       rescue ProjectRazorInterface::NoSliceFound
         error 406 do
-          JSON.dump({"slice" => "ProjectRazor::Slice", "result" => "InvalidSlice", 'http_error_code' => '406'})
-        end
-      rescue => e
-        error 500 do
-          e.message
+          {"slice" => "ProjectRazor::Slice", "result" => "InvalidSlice", 'http_error_code' => '406'}.to_json
         end
       end
     end
@@ -58,8 +50,10 @@ class ProjectRazorAPI < Sinatra::Base
     api_call params[:slice], params.delete!(:slice)
   end
 
-  get '/razor/image/mk/:kernel' do
-    send_file run_razor(['image', 'path', params[:kernel]])
+  get '/razor/image/mk/:image' do
+    result = run_razor(['image', 'path', 'mk', params[:image]])
+    status result['status']
+    result['response']
   end
 
   get '/razor/image/:image' do
