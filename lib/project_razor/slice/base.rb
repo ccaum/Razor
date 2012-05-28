@@ -271,8 +271,9 @@ module ProjectRazor
         return_hash["slice"] = self.class.to_s
         return_hash["command"] = @command
         return_hash["client_config"] = @data.config.get_client_config_hash if mk_response
+        logger.send log_level, "Slice Error: #{return_hash["result"]}"
         if @web_command
-          JSON.dump(return_hash)
+          raise JSON.dump(return_hash)
         else
           if @new_slice_style
             list_help(return_hash)
@@ -280,7 +281,6 @@ module ProjectRazor
             available_commands(return_hash)
           end
         end
-        logger.send log_level, "Slice Error: #{return_hash["result"]}"
       end
 
       # Prints available commands to CLI for slice
