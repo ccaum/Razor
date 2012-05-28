@@ -42,8 +42,7 @@ module ProjectRazor
           # @command_array.map! {|x| x.downcase}
           if @new_slice_style
             @command_hash = @slice_commands
-            new_slice_call
-            return
+            return new_slice_call
           end
 
           # First var in array should be our root command
@@ -52,8 +51,7 @@ module ProjectRazor
           flag = false
           @command = "default" if @command == nil
 
-          @slice_commands.each_pair do
-          |cmd_string, method|
+          @slice_commands.each_pair do |cmd_string, method|
             if @command == cmd_string.to_s
               logger.debug "Slice command called: #{@command}"
               self.send(method)
@@ -118,46 +116,39 @@ module ProjectRazor
           return
         end
 
-        @command_hash.each do
-        |k,v|
-          case k.class.to_s
-            when "Symbol"
-              #puts "Comparing #{@command_array.first.to_s} to #{k.to_s}(Symbol)"
-              if @command_array.first.to_s == k.to_s
-                #puts "**** Command matches - evaluating action"
-                #puts "removing arg"
-                @last_arg = @command_array.shift
-                @prev_args.push(@last_arg)
-                return eval_action(@command_hash[k])
-              end
-            when "String"
-              #puts "Comparing #{@command_array.first.to_s} to #{k.to_s}(String)"
-              if @command_array.first.to_s == k.to_s
-                #puts "**** Command matches - evaluating action"
-                #puts "removing arg"
-                @last_arg = @command_array.shift
-                @prev_args.push(@last_arg)
-                return eval_action(@command_hash[k])
-              end
-            when "Regexp"
-              #puts "Command is a regexp"
-              if @command_array.first =~ k
-                #puts "**** Command matches - evaluating action"
-                #puts "removing arg"
-                @last_arg = @command_array.shift
-                @prev_args.push(@last_arg)
-                return eval_action(@command_hash[k])
-              end
-            when "Array"
-              #puts "Command is a array"
-              if eval_command_array(k)
-                #puts "removing arg"
-                @last_arg =  @command_array.shift
-                @prev_args.push(@last_arg)
-                return eval_action(@command_hash[k])
-              end
-            else
-              #puts "Raise error, invalid type"
+        @command_hash.each do |k,v|
+          case k
+          when Symbol
+            if @command_array.first.to_s == k.to_s
+              #puts "**** Command matches - evaluating action"
+              #puts "removing arg"
+              @last_arg = @command_array.shift
+              @prev_args.push(@last_arg)
+              return eval_action(@command_hash[k])
+            end
+          when String
+            if @command_array.first.to_s == k.to_s
+              #puts "**** Command matches - evaluating action"
+              #puts "removing arg"
+              @last_arg = @command_array.shift
+              @prev_args.push(@last_arg)
+              return eval_action(@command_hash[k])
+            end
+          when Regexp
+            if @command_array.first =~ k
+              #puts "**** Command matches - evaluating action"
+              #puts "removing arg"
+              @last_arg = @command_array.shift
+              @prev_args.push(@last_arg)
+              return eval_action(@command_hash[k])
+            end
+          when Array
+            if eval_command_array(k)
+              #puts "removing arg"
+              @last_arg =  @command_array.shift
+              @prev_args.push(@last_arg)
+              return eval_action(@command_hash[k])
+            end
           end
         end
 
@@ -174,8 +165,7 @@ module ProjectRazor
       end
 
       def eval_command_array(command_array)
-        command_array.each do
-        |command_item|
+        command_array.each do |command_item|
           case command_item.class.to_s
             when "String", nil
               #puts "Comparing #{@command_array.first.to_s} to #{command_item.to_s}(String)"
@@ -191,27 +181,17 @@ module ProjectRazor
       end
 
       def eval_action(command_action)
-        case command_action.class.to_s
-          when "Symbol"
-            #puts "Action is a Symbol"
-            #puts "Calling command (#{command_action}) in command_hash"
-            #puts "inserting arg"
-            @command_array.unshift(command_action.to_s)
-            #puts @command_array.inspect
-            eval_command
-          when "String"
-            #puts "Action is a String"
-            #puts "Calling method in slice (#{command_action})"
-            self.send(command_action)
-          when "Hash"
-            #puts "Action is a Hash"
-            #puts "Iterating on Hash"
-            @command_hash = command_action
-            eval_command
-          else
-            #puts "Unknown command, throwing error"
-            #puts command_action.class.to_s
-            raise "InvalidActionSlice"
+        case command_action
+        when Symbol
+          @command_array.unshift(command_action.to_s)
+          eval_command
+        when String
+          self.send(command_action)
+        when Hash
+          @command_hash = command_action
+          eval_command
+        else
+          raise "InvalidActionSlice"
         end
       end
 
@@ -234,14 +214,14 @@ module ProjectRazor
         return_hash["response"] = response
         setup_data
         return_hash["client_config"] = @data.config.get_client_config_hash if mk_response
+        logger.debug "(#{return_hash["resource"]}  #{return_hash["command"]}  #{return_hash["result"]})"
         if @web_command
-          puts JSON.dump(return_hash)
+          return_hash
         else
           print "\n\n#{@slice_name.capitalize}"
           print " #{return_hash["command"]}\n"
           print " #{return_hash["response"]}\n"
         end
-        logger.debug "(#{return_hash["resource"]}  #{return_hash["command"]}  #{return_hash["result"]})"
       end
 
       def success_types
@@ -292,7 +272,7 @@ module ProjectRazor
         return_hash["command"] = @command
         return_hash["client_config"] = @data.config.get_client_config_hash if mk_response
         if @web_command
-          puts JSON.dump(return_hash)
+          JSON.dump(return_hash)
         else
           if @new_slice_style
             list_help(return_hash)
