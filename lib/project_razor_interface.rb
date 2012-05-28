@@ -22,7 +22,9 @@ class ProjectRazorInterface
     @slice_array = Array.new
     @arguments = Array.new
 
-    get_slices_loaded
+    @slice_array = ProjectRazor::Slice.class_children.map do |object_class|
+      object_class.to_s.gsub(/#{SLICE_PREFIX}/, '')
+    end
   end
 
   # Call the slice
@@ -34,13 +36,6 @@ class ProjectRazorInterface
     razor_module.verbose = verbose
     razor_module.debug = debug
     razor_module.slice_call
-  end
-
-  # Load slices
-  def get_slices_loaded
-    @slice_array = ProjectRazor::Slice.class_children.map do |object_class|
-      object_class.to_s.gsub(/#{SLICE_PREFIX}/, '')
-    end
   end
 
   # Validate slice

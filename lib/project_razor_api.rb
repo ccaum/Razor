@@ -22,9 +22,9 @@ class ProjectRazorAPI < Sinatra::Base
 
       begin
         razor.call_razor_slice
-      rescue ProjectRazorInterface::NoSliceFound
+      rescue => e
         error 406 do
-          {"slice" => "ProjectRazor::Slice", "result" => "InvalidSlice", 'http_error_code' => '406'}.to_json
+          e.message
         end
       end
     end
@@ -36,43 +36,56 @@ class ProjectRazorAPI < Sinatra::Base
         args << 'default'
       end
 
-      args << params.to_json
+      args << params
 
-      run_razor args
+      # XXX We really need to pick one class
+      # that gets returned
+      result = run_razor(args)
+      result.is_a?(String) ? result : result.to_json
     end
   end
 
   get '/razor/api/boot' do
-    api_call 'boot', params
+    api_call 'boot', params.to_json
   end
 
   get '/razor/api/:slice' do
-    api_call params[:slice], params.delete!(:slice)
+    slice = params[:slice]
+    params.delete :slice
+    api_call slice, params.to_json
+  end
+
+  get '/razor/api/*' do
+    commands = params[:splat].first.split('/')
+    params.delete(:splat)
+    api_call commands, params.to_json
   end
 
   get '/razor/image/mk/:image' do
     result = run_razor(['image', 'path', 'mk', params[:image]])
     status result['status']
-    result['response']
+    send_file result['response']
   end
 
-  get '/razor/image/:image' do
-    send_file File.join(config['@image_svc_path'], params[:image])
+  get '/razor/image/os/:image/*' do
+    result = run_razor(['image', 'path', params[:image]])
+    status result['status']
+    puts result['response'] + params[:splat].first
+    send_file result['response'] + params[:splat].first
   end
 
   post '/razor/api/*' do
-    puts params[:splat]
-    #run_razor(params[:splat])
+    commands = params[:splat].first.split('/')
+    api_call commands, params['json_hash']
   end
 
   put '/razor/api/*' do
-    puts params[:splat]
-    #run_razor(params[:splat])
+    commands = params[:splat].first.split('/')
+    api_call commands, params['json_hash']
   end
 
   delete '/razor/api/*' do
-    puts parmas[:splat]
-    #run_razor(params[:splat])
+    commands = params[:splat].first.split('/')
+    api_call commands, params['json_hash']
   end
-
 end

@@ -84,15 +84,20 @@ if $0 == __FILE__
     razor.arguments = ARGV
 
     begin
-      razor.call_razor_slice
+      result = razor.call_razor_slice
+      if razor.web_command
+        puts result
+      else
+        puts result
+      end
     rescue ProjectRazorInterface::NoSliceFound
       print_header
       print "\n [#{razor.namespace.capitalize}] ".red
       print "<-Invalid Slice \n".yellow
     rescue => e
-      raise if debug
-      if namespace
-        print "\n [#{namespace.capitalize}] ".red
+      raise if razor.debug
+      if razor.namespace
+        print "\n [#{razor.namespace.capitalize}] ".red
         print "<-#{e.message} \n".yellow
       end
     end
